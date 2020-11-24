@@ -1,8 +1,13 @@
+import '../style/index.less';
 import '../style/mian.less';
 import handlerDragEvent from '../share/el.drag';
 import Highlighter from './highlighter';
 import { createdEL, debounce, readXPath } from '../share/index';
 import drawer from '../form/drawer';
+import editStep from '../form/edit-step';
+import { Step } from '../interface/step';
+import doublyLinkedList from '../share/doublylinkedlist/index';
+import previewCom from './preview';
 
 enum StepGuidanceEnum {
   preview = 1,
@@ -14,39 +19,75 @@ class StepGuidance {
   preview: HTMLElement;
   edit: HTMLElement;
   highlighter: Highlighter;
-  moveing: boolean;
+  moveing: boolean = false;
   addBtn: HTMLElement;
   currentEl: HTMLElement; // 当前选中的元素
-  disableSelectNode: boolean;
+  disableSelectNode: boolean = false;
   drawer: drawer;
+  form: editStep;
+  stepMap: doublyLinkedList<Step> = new doublyLinkedList<Step>();
+  previewCom: previewCom;
 
   constructor() {
     this.model = StepGuidanceEnum.preview;
-    this.moveing = false;
-    this.disableSelectNode = false;
+    this.previewCom = new previewCom();
+
+    this._initHighlighter();
+
+    this._initEvent();
+
+    this._initDrawer();
+
+    this._created();
+  }
+
+  _initHighlighter() {
     this.addBtn = createdEL({
       style: 'cursor: pointer',
+      props: {
+        innerText: '加',
+      },
     }, 'span');
-    this.addBtn.innerText = '加';
     this.addBtn.addEventListener('click', () => {
       this.addNode();
     });
     this.highlighter = new Highlighter([this.addBtn]);
+  }
+
+  _initEvent() {
     document.addEventListener('scroll', () => {
       if (this.disableSelectNode || this.model !== StepGuidanceEnum.edit) return;
       this.highlighter.unHighlight();
     }, true);
-    this.drawer = new drawer();
+    window.addEventListener('resize', debounce(() => {
+      if (this.model !== StepGuidanceEnum.edit) return;
+      if (this.currentEl) this.highlighter.highlight(this.currentEl);
+    }, 100)
+      .bind(this));
   }
 
-  addNode(el?: HTMLElement) {
-    el = el || this.currentEl;
-    if (el) {
-      //
-      this.disableSelectNode = true;
-      const path = readXPath(el);
-      this.drawer.show();
-    }
+  _initDrawer() {
+    this.form = new editStep({
+      xpath: '',
+      content: '',
+      url: location.pathname,
+    }, (event: MouseEvent, step: Step) => {
+      const key = `${ step.url }%stepMapKey%${ step.xpath }`;
+      if (this.stepMap.isExist(key)) {
+        this.stepMap.updateItemByKey(key, step);
+      } else {
+        this.stepMap.addLastItem(key, step);
+      }
+      console.log(this.stepMap);
+      this.highlighter.unHighlight();
+      this.drawer.close();
+      this.disableSelectNode = false;
+    }, () => {
+      this.highlighter.unHighlight();
+      this.drawer.close();
+      this.disableSelectNode = false;
+    });
+    this.drawer = new drawer(null, this.form.el);
   }
 
   _selectNode = debounce((event: MouseEvent) => {
@@ -66,6 +107,7 @@ class StepGuidance {
       case StepGuidanceEnum.edit:
         this.edit.classList.add('active');
         this.preview.classList.remove('active');
+        this.previewCom.close();
         document.addEventListener('mousemove', this._selectNode);
         break;
       case StepGuidanceEnum.preview:
@@ -75,22 +117,47 @@ class StepGuidance {
         this.drawer.close();
         this.disableSelectNode = false;
         document.removeEventListener('mousemove', this._selectNode);
+        this.previewCom.show(this.stepMap);
         break;
       default:
     }
   }
 
-  created() {
-    const control = document.createElement('div');
-    control.className = 'step-guidance-control';
+  addNode(el?: HTMLElement) {
+    el = el || this.currentEl;
+    if (el) {
+      this.disableSelectNode = true;
+      const xpath = readXPath(el);
+      const url = location.pathname;
+      const key = `${ url }%stepMapKey%${ xpath }`;
+      const step = this.stepMap.getValueByKey(key);
+      this.form.update(step || {
+        xpath,
+        content: '',
+        url,
+      });
+      this.drawer.show();
+    }
+  }
 
-    this.preview = document.createElement('div');
-    this.preview.className = 'step-guidance-preview';
-    this.preview.innerText = '预览模式';
+  _created() {
+    const control = createdEL({
+      class: 'step-guidance-control',
+    });
 
-    this.edit = document.createElement('div');
-    this.edit.className = 'step-guidance-edit';
-    this.edit.innerText = '编辑模式';
+    this.preview = createdEL({
+      class: 'step-guidance-preview',
+      props: {
+        innerText: '预览模式',
+      },
+    });
+
+    this.edit = createdEL({
+      class: 'step-guidance-edit',
+      props: {
+        innerText: '编辑模式',
+      },
+    });
 
     if (this.model === StepGuidanceEnum.preview) {
       this.preview.classList.add('active');
@@ -116,7 +183,6 @@ class StepGuidance {
     });
     document.body.appendChild(control);
   }
-
 }
 
 export default StepGuidance;

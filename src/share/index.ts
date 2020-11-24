@@ -1,3 +1,5 @@
+import { Step } from '../interface/step';
+
 /**
  * 防抖
  * @param {Function} fn
@@ -53,13 +55,20 @@ export function readXPath(element: HTMLElement): string {
  */
 export function setAttrs(el: HTMLElement, attrs: object): void {
   const keys = Object.keys(attrs);
-  keys.forEach((item) => {
-    el.setAttribute(item, attrs[item]);
+  keys.forEach((key) => {
+    if (key === 'props') {
+      Object.keys(attrs[key])
+        .forEach(prosKey => {
+          el[prosKey] = attrs[key][prosKey];
+        });
+    } else {
+      el.setAttribute(key, attrs[key]);
+    }
   });
 }
 
 /**
- *
+ * 创建元素
  * @param {object} attrs
  * @param {string?} elName
  * @return {HTMLElement}
@@ -69,3 +78,57 @@ export function createdEL(attrs: object, elName?: string): HTMLElement {
   setAttrs(el, attrs);
   return el;
 }
+
+/**
+ * 获取step的默认配置
+ * @return {Step}
+ */
+export function getDefaultStep(): Step {
+  return {
+    url: location.pathname,
+    anchors: {
+      x: 50,
+      y: 100,
+    },
+    content: '',
+    isHtml: false,
+    xpath: '',
+    layout: {
+      width: 300,
+      height: 100,
+    },
+  };
+}
+
+export const isNullOrUndefined = (obj: any) => obj === null || obj === undefined;
+
+export const isObj = (obj: any) => typeof obj === 'object' && obj !== null;
+
+export const isArray = (obj: any) => {
+  if (Array.isArray) {
+    return Array.isArray(obj);
+  }
+  return Object.prototype.toString.call(obj) === '[object Array]';
+};
+
+/**
+ * 深度克隆
+ *
+ * 支持克隆循环引用
+ * 不支持克隆 function、Data、RegExp等
+ * @param {*} obj
+ * @param {WeakMap<*, *>} map
+ * @return {*}
+ */
+export const deepClone = function(obj: any, map: WeakMap<any, any> = new WeakMap()): any {
+  if (!isObj(obj)) return obj;
+  if (map.has(obj)) return map.get(obj);
+  const o = isArray(obj) ? [] : {};
+  map.set(obj, o);
+  for (let key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      o[key] = deepClone(obj[key], map);
+    }
+  }
+  return o;
+};

@@ -11,7 +11,7 @@ export default {
     name: 'stepGuidance',
     format: 'iife',
   }/*, {
-   file: 'dist/ai-rule-parser.umd.js',
+   file: 'dist/stepGuidance.umd.js',
    name: 'aiRuleParser',
    format: 'umd',
    }*/],
@@ -21,6 +21,7 @@ export default {
     // }),
     less({
       insert: true,
+      output: false,
     }),
     typescript(),
     // babel({

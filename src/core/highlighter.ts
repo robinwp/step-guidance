@@ -12,27 +12,10 @@ export default class Highlighter {
       pointer-events: none;display:flex;align-items: center;justify-content: center;
       border-radius: 3px`
     });
-    // this.overlay = document.createElement('div');
-    // this.overlay.style.backgroundColor = 'rgba(104, 182, 255, 0.35)';
-    // this.overlay.style.position = 'fixed';
-    // this.overlay.style.zIndex = '9999999';
-    // this.overlay.style.pointerEvents = 'none';
-    // this.overlay.style.display = 'flex';
-    // this.overlay.style.alignItems = 'center';
-    // this.overlay.style.justifyContent = 'center';
-    // this.overlay.style.borderRadius = '3px';
     this.overlayContent = createdEL({
       style: `background-color: rgba(104, 182, 255, 0.9);font-family: "monospace";font-size: 11px; padding: 2px 3px;
       border-radius: 3px;color: white;pointer-events: none;`
     });
-    // this.overlayContent = document.createElement('div');
-    // this.overlayContent.style.backgroundColor = 'rgba(104, 182, 255, 0.9)';
-    // this.overlayContent.style.fontFamily = 'monospace';
-    // this.overlayContent.style.fontSize = '11px';
-    // this.overlayContent.style.padding = '2px 3px';
-    // this.overlayContent.style.borderRadius = '3px';
-    // this.overlayContent.style.color = 'white';
-    // this.overlayContent.style.pointerEvents = 'none';
     this.overlay.appendChild(this.overlayContent);
   }
 

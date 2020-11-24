@@ -1,0 +1,51 @@
+@import "./var.less";
+
+.step-preview {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  margin: 0;
+  //background: rgba(0, 0, 0, 0.5);
+  z-index: 99999999;
+
+  .step-tooltip__warp {
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: @white;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+
+
+    .step-tooltip__arrow {
+      position: absolute;
+      bottom: -20px;
+      border-width: 10px 7px;
+      left: calc(50% - 10px);
+      border-color: transparent;
+      border-top-color: #fff;
+      border-style: solid;
+    }
+  }
+
+  .step-tooltip__body {
+    padding: 10px 20px;
+    height: 100%;
+    flex-shrink: 1;
+
+  }
+
+  .step-tooltip__footer {
+    padding: 10px 20px;
+    flex-shrink: 0;
+  }
+
+  .step-tooltip__rect {
+    box-shadow: rgba(0, 0, 0, 0.4) 0 0 15px, rgba(0, 0, 0, 0.2) 0 0 0 99999px;
+    border-radius: 4px;
+  }
+}
