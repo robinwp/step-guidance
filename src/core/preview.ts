@@ -31,7 +31,6 @@ export default class preview {
     this.iterator = this.stepMap.createIterator();
     const { value, done } = this.iterator.next();
     if (value) {
-      console.log(done);
       this._createTooltip(value, done, true);
     }
   }
@@ -39,15 +38,12 @@ export default class preview {
   _createEvent() {
     document.addEventListener('scroll', () => {
       if (this.currentStep) {
-        this.previewEL.innerHTML = '';
         this._createTooltip(this.currentStep.step, this.currentStep.done, this.currentStep.isFirst, true);
       }
     }, true);
 
     window.addEventListener('resize', debounce(() => {
       if (this.currentStep) {
-        this.previewEL.innerHTML = '';
-        console.log(1);
         this._createTooltip(this.currentStep.step, this.currentStep.done, this.currentStep.isFirst, true);
       }
     }, 100)
@@ -74,9 +70,7 @@ export default class preview {
         },
       });
       prev.addEventListener('click', () => {
-        this.previewEL.innerHTML = '';
         const item = this.iterator.prev();
-        console.log(item);
         this._createTooltip(item.value, false, item.done);
       });
       footer.appendChild(prev);
@@ -88,7 +82,6 @@ export default class preview {
       },
     });
     next.addEventListener('click', () => {
-      this.previewEL.innerHTML = '';
       if (done) {
         this.close();
       } else {
@@ -106,12 +99,15 @@ export default class preview {
 
   async _createTooltip(step: Step, done: boolean, isFirst?: boolean, noscript?: boolean) {
     this.currentStep = { step, done, isFirst };
+    const node = (document.evaluate(step.xpath, document, null, XPathResult.ANY_TYPE, null)
+      .iterateNext() as HTMLElement);
+    if (!node) return;
+    this.previewEL.innerHTML = '';
     if (step.javaScript && !noscript) {
       try {
         await this.evalJS(step.javaScript);
       } catch (e) {
         console.log(e);
-        return;
       }
     }
     const warp = createdEL({
@@ -138,22 +134,18 @@ export default class preview {
     warp.appendChild(arrow);
 
     warp.appendChild(this._createFooter(done, isFirst));
-    const node = (document.evaluate(step.xpath, document, null, XPathResult.ANY_TYPE, null)
-      .iterateNext() as HTMLElement);
-    if (node) {
-      const rect = node.getBoundingClientRect();
-      const rectEl = createdEL({
-        class: 'step-tooltip__rect',
-      });
-      rectEl.style.position = 'absolute';
-      rectEl.style.top = rect.top - 4 + 'px';
-      rectEl.style.left = rect.left - 4 + 'px';
-      rectEl.style.width = rect.width + 8 + 'px';
-      rectEl.style.height = rect.height + 8 + 'px';
-      warp.style.left = rect.width / 2 - step.layout.width / 2 + 'px';
-      warp.style.top = -(step.layout.height + 20) + 'px';
-      rectEl.appendChild(warp);
-      this.previewEL.appendChild(rectEl);
-    }
+    const rect = node.getBoundingClientRect();
+    const rectEl = createdEL({
+      class: 'step-tooltip__rect',
+    });
+    rectEl.style.position = 'absolute';
+    rectEl.style.top = rect.top - 4 + 'px';
+    rectEl.style.left = rect.left - 4 + 'px';
+    rectEl.style.width = rect.width + 8 + 'px';
+    rectEl.style.height = rect.height + 8 + 'px';
+    warp.style.left = rect.width / 2 - step.layout.width / 2 + 'px';
+    warp.style.top = -(step.layout.height + 20) + 'px';
+    rectEl.appendChild(warp);
+    this.previewEL.appendChild(rectEl);
   }
 }
