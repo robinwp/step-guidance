@@ -1,0 +1,47 @@
+@height: 40px;
+@white: #FFF;
+@black: #333;
+@btnBgColor: #3f86ff;
+@borderColor: #ebebeb;
+
+.step-guidance-control {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: @height;
+  display: flex;
+  overflow: hidden;
+  z-index: 2147483647;
+
+  .step-guidance-preview, .step-guidance-edit {
+    padding: 0 20px;
+    height: @height;
+    line-height: @height;
+    color: @black;
+    background: @white;
+    cursor: pointer;
+    border: 1px solid @borderColor;
+
+    &.active {
+      color: @white;
+      background: @btnBgColor;
+      border: 1px solid @btnBgColor;
+    }
+  }
+
+  .step-guidance-preview {
+    border-right: none;
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+  }
+
+  .step-guidance-edit {
+    border-left: none;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+  }
+
+}
+
+
+
