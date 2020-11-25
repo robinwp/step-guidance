@@ -93,23 +93,24 @@ export default class preview {
     return footer;
   }
 
-  evalJS(javaScript: string) {
+  evalJS(xpath: string, javaScript: string) {
     return eval(javaScript);
   }
 
   async _createTooltip(step: Step, done: boolean, isFirst?: boolean, noscript?: boolean) {
     this.currentStep = { step, done, isFirst };
-    const node = (document.evaluate(step.xpath, document, null, XPathResult.ANY_TYPE, null)
-      .iterateNext() as HTMLElement);
-    if (!node) return;
     this.previewEL.innerHTML = '';
     if (step.javaScript && !noscript) {
       try {
-        await this.evalJS(step.javaScript);
+        await this.evalJS(step.xpath, step.javaScript);
       } catch (e) {
+        alert('执行脚本出错');
         console.log(e);
       }
     }
+    const node = (document.evaluate(step.xpath, document, null, XPathResult.ANY_TYPE, null)
+      .iterateNext() as HTMLElement);
+    if (!node) return;
     const warp = createdEL({
       class: 'step-tooltip__warp',
       style: `width: ${ step.layout.width }px;height: ${ step.layout.height }px;`,
@@ -128,13 +129,12 @@ export default class preview {
     const arrow = createdEL({
       class: 'step-tooltip__arrow',
     });
-    // todo 计算出合适的释放位置
-    arrow.style.top = `${ step.anchors.y }%`;
-    arrow.style.left = `calc(${ step.anchors.x }% - 10px)`;
     warp.appendChild(arrow);
 
     warp.appendChild(this._createFooter(done, isFirst));
+    !noscript && node.scrollIntoView({ block: 'end', inline: 'center' });
     const rect = node.getBoundingClientRect();
+    // todo 计算出合适的释放位置
     const rectEl = createdEL({
       class: 'step-tooltip__rect',
     });
@@ -145,6 +145,8 @@ export default class preview {
     rectEl.style.height = rect.height + 8 + 'px';
     warp.style.left = rect.width / 2 - step.layout.width / 2 + 'px';
     warp.style.top = -(step.layout.height + 20) + 'px';
+    arrow.style.top = `${ step.anchors.y }%`;
+    arrow.style.left = `calc(${ step.anchors.x }% - 10px)`;
     rectEl.appendChild(warp);
     this.previewEL.appendChild(rectEl);
   }
