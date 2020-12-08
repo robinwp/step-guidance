@@ -86,16 +86,17 @@ export function createdEL(attrs: object, elName?: string): HTMLElement {
 export function getDefaultStep(): Step {
   return {
     url: location.pathname,
-    anchors: {
-      x: 50,
-      y: 100,
-    },
+    // anchors: {
+    //   x: 50,
+    //   y: 100,
+    // },
     content: '',
     isHtml: false,
     xpath: '',
     layout: {
       width: 300,
       height: 100,
+      offset: 20,
     },
   };
 }

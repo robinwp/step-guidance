@@ -48,6 +48,7 @@ export default class EditStep {
       class: 'step-edit__label',
       props: {
         innerText: 'xpath',
+        // innerHTML: '<span>xpath</span><span class="desc">由于使用的xpath，请避免在</span>'
       },
     }, 'p'));
 

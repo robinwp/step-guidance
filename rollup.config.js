@@ -10,11 +10,11 @@ export default {
     file: 'dist/stepGuidance.min.js',
     name: 'stepGuidance',
     format: 'iife',
-  }/*, {
+  }, {
    file: 'dist/stepGuidance.umd.js',
-   name: 'aiRuleParser',
+   name: 'stepGuidance',
    format: 'umd',
-   }*/],
+   }],
   plugins: [
     // postcss({
     //   extensions: ['.css'],

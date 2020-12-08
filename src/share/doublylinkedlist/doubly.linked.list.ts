@@ -345,4 +345,19 @@ export default class DoublyLinkedList<T> {
   //     },
   //   };
   // }
+
+  /**
+   * 批量添加数据
+   * @param {string} key
+   * @param {*} queueObject
+   */
+  addLastItemByList(key: string, queueObject: any) {
+    if (queueObject && typeof queueObject === 'object' && Object.prototype.hasOwnProperty.call(queueObject, key)) {
+      this.addLastItem(key, queueObject[key].value);
+      const nextKey = queueObject[key].nextKey;
+      if (nextKey) {
+        this.addLastItemByList(nextKey, queueObject);
+      }
+    }
+  }
 }

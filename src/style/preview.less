@@ -19,13 +19,11 @@
     border-radius: 4px;
     display: flex;
     flex-direction: column;
-
+    border: 1px solid @borderColor;
 
     .step-tooltip__arrow {
       position: absolute;
-      bottom: -20px;
-      border-width: 10px 7px;
-      left: calc(50% - 10px);
+      border-width: 10px 7px 0;
       border-color: transparent;
       border-top-color: #fff;
       border-style: solid;
@@ -45,7 +43,7 @@
   }
 
   .step-tooltip__rect {
-    box-shadow: rgba(0, 0, 0, 0.4) 0 0 15px, rgba(0, 0, 0, 0.2) 0 0 0 99999px;
+    box-shadow: rgba(0, 0, 0, 0.4) 0 0 15px, rgba(0, 0, 0, 0.5) 0 0 0 99999px;
     border-radius: 4px;
   }
 }

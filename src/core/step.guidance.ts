@@ -5,9 +5,10 @@ import Highlighter from './highlighter';
 import { createdEL, debounce, readXPath } from '../share/index';
 import drawer from '../form/drawer';
 import editStep from '../form/edit-step';
-import { Step } from '../interface/step';
+import { CurrentStep, Step } from '../interface/step';
 import doublyLinkedList from '../share/doublylinkedlist/index';
 import previewCom from './preview';
+import DoublyLinkedList from '../share/doublylinkedlist/index';
 
 enum StepGuidanceEnum {
   preview = 1,
@@ -25,12 +26,15 @@ class StepGuidance {
   disableSelectNode: boolean = false;
   drawer: drawer;
   form: editStep;
+  currentStep: CurrentStep = null;
   stepMap: doublyLinkedList<Step> = new doublyLinkedList<Step>();
   previewCom: previewCom;
+  app: any; // 执行js时的可操作对象，比如可以吧网站的vue对象传入，在执行js时，就可以使用app.$router.push 进行页面跳转
+  static isVue: boolean = false;
 
-  constructor() {
-    this.model = StepGuidanceEnum.preview;
-    this.previewCom = new previewCom();
+  constructor(app) {
+    // this.model = StepGuidanceEnum.preview;
+    this.app = app;
 
     this._initHighlighter();
 
@@ -39,6 +43,11 @@ class StepGuidance {
     this._initDrawer();
 
     this._created();
+
+    this.loadData();
+
+    this.previewCom = new previewCom(null, this.app, this.currentStep);
+    this.previewCom.isVue = StepGuidance.isVue;
   }
 
   _initHighlighter() {
@@ -78,7 +87,6 @@ class StepGuidance {
       } else {
         this.stepMap.addLastItem(key, step);
       }
-      console.log(this.stepMap);
       this.highlighter.unHighlight();
       this.drawer.close();
       this.disableSelectNode = false;
@@ -88,6 +96,63 @@ class StepGuidance {
       this.disableSelectNode = false;
     });
     this.drawer = new drawer(null, this.form.el);
+  }
+
+  _created() {
+    const control = createdEL({
+      class: 'step-guidance-control',
+    });
+
+    this.preview = createdEL({
+      class: 'step-guidance-btn step-guidance-left',
+      props: {
+        innerText: '预览',
+      },
+    });
+
+    this.edit = createdEL({
+      class: 'step-guidance-btn step-guidance-mid',
+      props: {
+        innerText: '编辑',
+      },
+    });
+
+    const save = createdEL({
+      class: 'step-guidance-btn step-guidance-right',
+      props: {
+        innerText: '保存',
+      },
+    });
+
+
+    if (this.model === StepGuidanceEnum.preview) {
+      this.preview.classList.add('active');
+    } else if (this.model === StepGuidanceEnum.edit) {
+      this.edit.classList.add('active');
+    }
+
+    this.preview.addEventListener('click', () => {
+      if (!this.moveing && this.model !== StepGuidanceEnum.preview) this.toggleModel(StepGuidanceEnum.preview);
+    });
+    this.edit.addEventListener('click', () => {
+      if (!this.moveing && this.model !== StepGuidanceEnum.edit) this.toggleModel(StepGuidanceEnum.edit);
+    });
+
+    save.addEventListener('click', () => {
+      if (!this.moveing) this.save();
+    });
+    control.appendChild(this.preview);
+    control.appendChild(this.edit);
+    control.appendChild(save);
+
+    handlerDragEvent(control, () => {
+      this.moveing = true;
+    }, () => {
+      setTimeout(() => {
+        this.moveing = false;
+      });
+    });
+    document.body.appendChild(control);
   }
 
   _selectNode = debounce((event: MouseEvent) => {
@@ -101,7 +166,6 @@ class StepGuidance {
     .bind(this);
 
   toggleModel(modal: StepGuidanceEnum) {
-    if (this.model === modal) return;
     this.model = modal;
     switch (this.model) {
       case StepGuidanceEnum.edit:
@@ -140,48 +204,35 @@ class StepGuidance {
     }
   }
 
-  _created() {
-    const control = createdEL({
-      class: 'step-guidance-control',
-    });
+  save() {
+    const len = this.stepMap.getSize();
+    if (len > 0) {
+      localStorage.setItem('step-guidance-map', JSON.stringify(this.stepMap));
+      alert(`保存了${ len }条步骤`);
+    } else {
+      alert('没有添加任何步骤');
+    }
+  }
 
-    this.preview = createdEL({
-      class: 'step-guidance-preview',
-      props: {
-        innerText: '预览模式',
-      },
-    });
-
-    this.edit = createdEL({
-      class: 'step-guidance-edit',
-      props: {
-        innerText: '编辑模式',
-      },
-    });
-
-    if (this.model === StepGuidanceEnum.preview) {
-      this.preview.classList.add('active');
-    } else if (this.model === StepGuidanceEnum.edit) {
-      this.edit.classList.add('active');
+  loadData() {
+    try {
+      const data = (JSON.parse(localStorage.getItem('step-guidance-map')) as DoublyLinkedList<Step>);
+      if (data) {
+        this.stepMap.addLastItemByList(data.firstKey, data.queue);
+      }
+    } catch (e) {
+      this.stepMap = new doublyLinkedList<Step>();
     }
 
-    this.preview.addEventListener('click', () => {
-      if (!this.moveing) this.toggleModel(StepGuidanceEnum.preview);
-    });
-    this.edit.addEventListener('click', () => {
-      if (!this.moveing) this.toggleModel(StepGuidanceEnum.edit);
-    });
-    control.appendChild(this.preview);
-    control.appendChild(this.edit);
+    try {
+      this.currentStep = (JSON.parse(localStorage.getItem('step-guidance-current')) as CurrentStep);
+    } catch (e) {
+      this.currentStep = null;
+    }
+  }
 
-    handlerDragEvent(control, () => {
-      this.moveing = true;
-    }, () => {
-      setTimeout(() => {
-        this.moveing = false;
-      });
-    });
-    document.body.appendChild(control);
+  start() {
+    this.toggleModel(StepGuidanceEnum.preview);
   }
 }
 
