@@ -2,10 +2,10 @@ import { createdEL } from '../share/index';
 import '../style/drawer.less';
 
 export default class Drawer {
-  visible: boolean;
-  drawer: HTMLElement;
-  el: HTMLElement;
-  bodyOverflow: string;
+  private visible: boolean;
+  private drawer: HTMLElement;
+  private el: HTMLElement;
+  private bodyOverflow: string;
 
   constructor(el?: HTMLElement, content?: HTMLElement) {
     this.visible = false;
@@ -13,7 +13,7 @@ export default class Drawer {
     this._create(content);
   }
 
-  _create(content?: HTMLElement) {
+  private _create(content?: HTMLElement) {
     // const drawer = document.createElement('div');
     this.drawer = createdEL({
       class: 'step-drawer',
@@ -39,20 +39,20 @@ export default class Drawer {
     this.el.appendChild(this.drawer);
   }
 
-  show() {
+  public show() {
     this.visible = true;
     this.bodyOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     this.drawer.style.display = 'block';
   }
 
-  close() {
+  public close() {
     document.body.style.overflow = this.bodyOverflow;
     this.visible = false;
     this.drawer.style.display = 'none';
   }
 
-  destroy() {
+  public destroy() {
     this.el.removeChild(this.drawer);
     this.el = null;
     this.drawer = null;

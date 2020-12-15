@@ -73,9 +73,9 @@ export function setAttrs(el: HTMLElement, attrs: object): void {
  * @param {string?} elName
  * @return {HTMLElement}
  */
-export function createdEL(attrs: object, elName?: string): HTMLElement {
+export function createdEL(attrs?: object, elName?: string): HTMLElement {
   const el = document.createElement(elName || 'div');
-  setAttrs(el, attrs);
+  if (attrs) setAttrs(el, attrs);
   return el;
 }
 
@@ -132,4 +132,17 @@ export const deepClone = function(obj: any, map: WeakMap<any, any> = new WeakMap
     }
   }
   return o;
+};
+
+export const getNodeByXpath = function(xpath: string): Node {
+  return document.evaluate(xpath, document, null, XPathResult.ANY_TYPE, null)
+    .iterateNext();
+};
+
+export const getStepKey = (step: Step): string => {
+  return generateStepKey(step.url, step.xpath);
+};
+
+export const generateStepKey = (url: string, xpath: string): string => {
+  return `${ url }%stepMapKey%${ xpath }`;
 };

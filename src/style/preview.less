@@ -8,7 +8,6 @@
   left: 0;
   overflow: hidden;
   margin: 0;
-  //background: rgba(0, 0, 0, 0.5);
   z-index: 99999999;
 
   .step-tooltip__warp {
@@ -23,10 +22,22 @@
 
     .step-tooltip__arrow {
       position: absolute;
-      border-width: 10px 7px 0;
+      border-width: 12px 8px 0;
       border-color: transparent;
-      border-top-color: #fff;
+      border-top-color: @borderColor;
       border-style: solid;
+      z-index: 1;
+
+      &::after {
+        position: absolute;
+        top: -12px;
+        left: -6px;
+        content: " ";
+        border-width: 10px 6px 0;
+        border-color: transparent;
+        border-top-color: @white;
+        border-style: solid;
+      }
     }
   }
 
@@ -34,12 +45,16 @@
     padding: 10px 20px;
     height: 100%;
     flex-shrink: 1;
-
+    background: @white;
+    z-index: 10;
   }
 
   .step-tooltip__footer {
     padding: 10px 20px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
 
   .step-tooltip__rect {

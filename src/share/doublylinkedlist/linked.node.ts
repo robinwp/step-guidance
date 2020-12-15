@@ -2,10 +2,10 @@
  * 节点
  */
 export default class LinkedNode<T> {
-  key: string;
-  value: T;
-  nextKey: string;
-  beforeKey: string;
+  private key: string;
+  private value: T;
+  private nextKey: string;
+  private beforeKey: string;
 
   constructor(key: string, value: T, nextKey?: string, beforeKey?: string) {
     this.key = key;

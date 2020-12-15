@@ -4,14 +4,14 @@ import { Step } from '../interface/step';
 
 
 export default class EditStep {
-  el: HTMLElement;
-  step: Step;
-  xpath: HTMLInputElement;
-  content: HTMLTextAreaElement;
-  completeCb: Function;
-  cancelCb: Function;
-  javaScript: HTMLTextAreaElement;
-  switch: HTMLElement;
+  public el: HTMLElement;
+  private step: Step;
+  private xpath: HTMLInputElement;
+  private content: HTMLTextAreaElement;
+  private readonly completeCb: Function;
+  private readonly cancelCb: Function;
+  private javaScript: HTMLTextAreaElement;
+  private switch: HTMLElement;
 
   constructor(step: Step, completeCb?: Function, cancelCb?: Function) {
     this.step = Object.assign({}, getDefaultStep(), step);
@@ -20,7 +20,7 @@ export default class EditStep {
     this._create();
   }
 
-  update(step: Step) {
+  public update(step: Step) {
     this.step = Object.assign({}, getDefaultStep(), step);
     this.xpath.value = this.step.xpath || '';
     this.content.value = this.step.content || '';
@@ -32,7 +32,7 @@ export default class EditStep {
     }
   }
 
-  _create() {
+  private _create() {
 
     const warp = createdEL({
       class: 'step-edit__warp',
@@ -103,7 +103,6 @@ export default class EditStep {
       this.step.content = this.content.value;
     });
     body.appendChild(this.content);
-    // todo 位置信息
     body.appendChild(createdEL({
       class: 'step-edit__label',
       props: {

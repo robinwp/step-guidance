@@ -8,11 +8,11 @@ export default {
   input: 'src/index.ts',
   output: [{
     file: 'dist/stepGuidance.min.js',
-    name: 'stepGuidance',
+    name: 'StepGuidance',
     format: 'iife',
   }, {
    file: 'dist/stepGuidance.umd.js',
-   name: 'stepGuidance',
+   name: 'StepGuidance',
    format: 'umd',
    }],
   plugins: [

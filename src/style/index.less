@@ -1,5 +1,19 @@
 @import "./var.less";
 
+.step-btn__link {
+  display: inline-block;
+  color: @btnBgColor;
+  cursor: pointer;
+
+  & + &, & + .step-btn {
+    margin-left: 15px;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
 .step-btn {
   display: inline-block;
   line-height: 1;
@@ -29,7 +43,7 @@
     background-color: #ecf5ff;
   }
 
-  & + .step-btn {
+  & + &, & + .step-btn__link {
     margin-left: 15px;
   }
 
@@ -81,8 +95,8 @@
   vertical-align: middle;
 
   &.active {
-    border-color: #409eff;
-    background-color: #409eff;
+    border-color: @mianColor;
+    background-color: @mianColor;
 
     &:after {
       left: 100%;
@@ -99,6 +113,64 @@
     transition: all .3s;
     width: 16px;
     height: 16px;
-    background-color: #fff;
+    background-color: @white;
+  }
+}
+
+.step-radio {
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  cursor: pointer;
+  font-weight: normal;
+
+  & + & {
+    margin-left: 15px;
+  }
+
+  .step-radio__input {
+    width: 16px;
+    height: 16px;
+    border: 1px solid @borderColor;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+
+    &:hover {
+      border: 1px solid @mianColor;
+    }
+
+    &::after {
+      width: 4px;
+      height: 4px;
+      border-radius: 100%;
+      background-color: @white;
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      transition: transform .15s ease-in;
+    }
+  }
+
+  &.active {
+    .step-radio__input {
+      background: @mianColor;
+
+      &::after {
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    .step-radio__label {
+      color: @mianColor;
+    }
+  }
+
+
+  .step-radio__label {
+    margin-left: 5px;
+    font-size: 14px;
   }
 }

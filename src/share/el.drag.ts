@@ -1,8 +1,8 @@
 /**
  * 处理拖拽指令
  * @param {HTMLElement} el 绑定拖拽指令的元素
- * @param {Function} moveingCallback 拖拽后的回调
- * @param {Function} moveEndCallback
+ * @param {Function} moveingCallback 拖拽中的回调
+ * @param {Function} moveEndCallback 拖拽结束后的回调
  * @param {boolean} parent 是否是父元素实现拖拽
  * @param {boolean} containment 限制拖拽区域为父元素。否则验证区域是window
  */

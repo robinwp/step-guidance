@@ -31,3 +31,10 @@ export interface CurrentStep {
   done: boolean,
   isFirst: boolean
 }
+
+type iteratorFun<T> = () => { value: T, done: boolean };
+
+export interface StepIterator<T> {
+  next: iteratorFun<T>,
+  prev: iteratorFun<T>
+}

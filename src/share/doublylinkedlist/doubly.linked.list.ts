@@ -1,5 +1,6 @@
 import LinkedNode from './linked.node';
-import { isNullOrUndefined } from '../index';
+import { StepIterator } from '../../interface/step';
+
 
 /**
  * 双向链表
@@ -9,14 +10,12 @@ import { isNullOrUndefined } from '../index';
  */
 
 export default class DoublyLinkedList<T> {
-  size: number;
-  queue: object;
-  firstKey: string;
-  lastKey: string;
+  private readonly queue: Map<string, LinkedNode<T>>;
+  private firstKey: string;
+  private lastKey: string;
 
   constructor() {
-    this.size = 0;
-    this.queue = Object.create(null);
+    this.queue = new Map<string, LinkedNode<T>>();
     this.firstKey = null;
     this.lastKey = null;
   }
@@ -26,7 +25,7 @@ export default class DoublyLinkedList<T> {
    * @returns {boolean}
    */
   isEmpty(): boolean {
-    return this.size === 0;
+    return this.queue.size === 0;
   }
 
   /**
@@ -39,6 +38,14 @@ export default class DoublyLinkedList<T> {
   }
 
   /**
+   * 获取最后一个的key值
+   * @return {string}
+   */
+  getLastKey(): string {
+    return this.lastKey;
+  }
+
+  /**
    * 判断当前key是否是第一个
    * @param key 节点的key
    * @returns {boolean}
@@ -48,13 +55,21 @@ export default class DoublyLinkedList<T> {
   }
 
   /**
+   * 获取第一个的key值
+   * @return {string}
+   */
+  getFirstKey(): string {
+    return this.firstKey;
+  }
+
+  /**
    * 判断key是否存在
    * @param key 节点的key
    * @return {boolean}
    */
   isExist(key: string): boolean {
     if (!key) return false;
-    return !isNullOrUndefined(this.queue[key]);
+    return this.queue.has(key);
   }
 
   /**
@@ -72,11 +87,11 @@ export default class DoublyLinkedList<T> {
         this.firstKey = key;
       }
       if (this.isExist(this.lastKey)) {
-        this.queue[this.lastKey].setNextKey(key);
+        this._getLinkedNodeByKey(this.lastKey)
+          .setNextKey(key);
       }
-      this.queue[key] = new LinkedNode(key, value, null, this.lastKey);
+      this.queue.set(key, new LinkedNode(key, value, null, this.lastKey));
       this.lastKey = key;
-      this.size++;
       return true;
     }
   }
@@ -96,11 +111,11 @@ export default class DoublyLinkedList<T> {
         this.lastKey = key;
       }
       if (this.isExist(this.firstKey)) {
-        this.queue[this.firstKey].setBeforeKey(key);
+        this._getLinkedNodeByKey(this.firstKey)
+          .setBeforeKey(key);
       }
-      this.queue[key] = new LinkedNode(key, value, this.firstKey, null);
+      this.queue.set(key, new LinkedNode(key, value, this.firstKey, null));
       this.firstKey = key;
-      this.size++;
       return true;
     }
   }
@@ -124,13 +139,12 @@ export default class DoublyLinkedList<T> {
       if (this.isLast(key)) {
         this.addLastItem(itemKey, itemValue);
       } else {
-        const node = this.queue[key];
+        const node = this._getLinkedNodeByKey(key);
         const nextKey = node.getNextKey();
-        this.queue[itemKey] = new LinkedNode(itemKey, itemValue, nextKey, key);
-        const nextNode = this.queue[nextKey];
+        this.queue.set(itemKey, new LinkedNode(itemKey, itemValue, nextKey, key));
+        const nextNode = this._getLinkedNodeByKey(nextKey);
         nextNode.setBeforeKey(itemKey);
         node.setNextKey(itemKey);
-        this.size++;
       }
       return true;
     }
@@ -155,13 +169,12 @@ export default class DoublyLinkedList<T> {
       if (this.isFirst(key)) {
         this.addFirstItem(itemKey, itemValue);
       } else {
-        const node = this.queue[key];
+        const node = this._getLinkedNodeByKey(key);
         const beforeKey = node.getBeforeKey();
-        this.queue[itemKey] = new LinkedNode(itemKey, itemValue, key, beforeKey);
-        const beforeNode = this.queue[beforeKey];
+        this.queue.set(itemKey, new LinkedNode(itemKey, itemValue, key, beforeKey));
+        const beforeNode = this._getLinkedNodeByKey(beforeKey);
         node.setBeforeKey(itemKey);
         beforeNode.setNextKey(itemKey);
-        this.size++;
       }
       return true;
     }
@@ -174,25 +187,24 @@ export default class DoublyLinkedList<T> {
    */
   removeItemByKey(key: string): boolean {
     if (this.isExist(key)) {
-      const node = this.queue[key];
+      const node = this._getLinkedNodeByKey(key);
       const nextKey = node.getNextKey();
       const beforeKey = node.getBeforeKey();
       if (this.isFirst(key)) {
-        const nextNode = this.queue[nextKey];
+        const nextNode = this._getLinkedNodeByKey(nextKey);
         nextNode.setBeforeKey(null);
         this.firstKey = nextKey;
       } else if (this.isLast(key)) {
-        const beforeNode = this.queue[beforeKey];
+        const beforeNode = this._getLinkedNodeByKey(beforeKey);
         beforeNode.setNextKey(null);
         this.lastKey = beforeKey;
       } else {
-        const nextNode = this.queue[nextKey];
-        const beforeNode = this.queue[beforeKey];
+        const nextNode = this._getLinkedNodeByKey(nextKey);
+        const beforeNode = this._getLinkedNodeByKey(beforeKey);
         beforeNode.setNextKey(nextKey);
         nextNode.setBeforeKey(beforeKey);
       }
-      delete this.queue[key];
-      this.size--;
+      this.queue.delete(key);
       return true;
     }
     return false;
@@ -206,7 +218,8 @@ export default class DoublyLinkedList<T> {
    */
   updateItemByKey(key: string, value: T): boolean {
     if (this.isExist(key)) {
-      this.queue[key].setValue(value);
+      this._getLinkedNodeByKey(key)
+        .setValue(value);
       return true;
     }
     return false;
@@ -218,10 +231,14 @@ export default class DoublyLinkedList<T> {
    * @return {*}
    */
   getValueByKey(key: string): T {
-    if (this.isExist(key)) {
-      return this.queue[key].getValue();
-    }
-    return null;
+    const linkedNode = this._getLinkedNodeByKey(key);
+    if (linkedNode)
+      return linkedNode.getValue();
+    else return null;
+  }
+
+  _getLinkedNodeByKey(key: string): LinkedNode<T> {
+    return this.queue.get(key);
   }
 
   /**
@@ -229,7 +246,7 @@ export default class DoublyLinkedList<T> {
    * @return {number}
    */
   getSize(): number {
-    return this.size;
+    return this.queue.size;
   }
 
   /**
@@ -251,17 +268,34 @@ export default class DoublyLinkedList<T> {
    * @return {string[]}
    */
   getKeys(): string[] {
-    return Object.keys(this.queue);
+    return Array.from(this.queue.keys());
   }
 
   /**
    * 创建一个正向的迭代器
-   * @param {string} key 开始迭代的节点key, 默认是 第一个节点
-   * @return {next: (function(): {value: *, done: boolean}), prev:(function():{value: *, done: boolean})}
+   * 本来是要写一个迭代器的，但是由于要实现上一步和下一步，就只好先这样了
+   * @param {string} [key] 开始迭代的节点key, 默认是 第一个节点
+   * @return {{next(): {done: boolean; value: null}; prev(): {done: boolean; value: null}}}
    */
-  createIterator(key?: string) {
+  createIterator(key?: string): StepIterator<T> {
     key = key ? key : this.firstKey;
-    let prevekey = null;
+    let prevekey = key;
+    if (!this.isExist(key)) {
+      return {
+        next() {
+          return {
+            done: true,
+            value: null,
+          };
+        },
+        prev() {
+          return {
+            done: true,
+            value: null,
+          };
+        },
+      };
+    }
     return {
       next: () => {
         if (!key) {
@@ -273,7 +307,8 @@ export default class DoublyLinkedList<T> {
         const value = this.getValueByKey(key);
         const done = this.isLast(key);
         prevekey = key;
-        key = this.queue[key].getNextKey();
+        key = this._getLinkedNodeByKey(key)
+          .getNextKey();
         return {
           value,
           done,
@@ -286,7 +321,8 @@ export default class DoublyLinkedList<T> {
             value: null,
           };
         }
-        const beforeKey = this.queue[prevekey].getBeforeKey();
+        const beforeKey = this._getLinkedNodeByKey(prevekey)
+          .getBeforeKey();
         key = prevekey;
         prevekey = beforeKey;
         if (beforeKey) {
@@ -307,45 +343,6 @@ export default class DoublyLinkedList<T> {
     };
   }
 
-  //
-  // /**
-  //  * 创建一个倒序的迭代器
-  //  * @param key 开始迭代的节点key, 默认是 最后一个节点
-  //  * @param total 迭代的次数。 小于或者等于 0 代表不限制迭代次数。
-  //  * @return {{next: (function(): {value: *, done: boolean})}}
-  //  */
-  // createReverseIterator(key, total = -1) {
-  //   if (typeof total !== 'number') {
-  //     throw TypeError('total 必须是数字');
-  //   }
-  //   if (this.isEmpty()) {
-  //     throw RangeError('链表中不存在任何节点');
-  //   }
-  //   key = key ? key : this.lastKey;
-  //   if (!this.isExist(key)) {
-  //     throw RangeError('找不到key所对应的节点');
-  //   }
-  //   return {
-  //     next: () => {
-  //       if (!key) {
-  //         // 迭代结束后，还在继续迭代
-  //         return {
-  //           done: true,
-  //           value: null,
-  //         };
-  //       }
-  //       const value = this.getValueByKey(key);
-  //       total -= 1;
-  //       const done = this.isFirst(key) || total === 0;
-  //       key = this.queue[key].getBeforeKey();
-  //       return {
-  //         value,
-  //         done,
-  //       };
-  //     },
-  //   };
-  // }
-
   /**
    * 批量添加数据
    * @param {string} key
@@ -357,6 +354,174 @@ export default class DoublyLinkedList<T> {
       const nextKey = queueObject[key].nextKey;
       if (nextKey) {
         this.addLastItemByList(nextKey, queueObject);
+      }
+    }
+  }
+
+  /**
+   * 将双向链表转成json字符串
+   * @return {string} JSON 字符串
+   */
+  toJSON(): string {
+    const queue = Object.create(null);
+    this.queue.forEach((value: LinkedNode<T>, key: string) => {
+      queue[key] = value;
+    });
+    return JSON.stringify({
+      queue,
+      firstKey: this.firstKey,
+      lastKey: this.lastKey,
+    });
+  }
+
+  /**
+   * 克隆一个新对象
+   */
+  clone(): DoublyLinkedList<T> {
+    const data = JSON.parse(this.toJSON());
+    const cloneList = new DoublyLinkedList<T>();
+    cloneList.addLastItemByList(data.firstKey, data.queue);
+    return cloneList;
+  }
+
+  /**
+   * 将节点上移一个位置
+   * @param {string} key
+   */
+  moveupByKey(key: string) {
+    if (this.isFirst(key)) return;
+    if (this.isExist(key)) {
+      const sourceNode = this._getLinkedNodeByKey(key);
+      const nextKey = sourceNode.getNextKey();
+      const beforeKey = sourceNode.getBeforeKey();
+
+      const targetNode = this._getLinkedNodeByKey(beforeKey);
+      const targetbeforeKey = targetNode.getBeforeKey();
+
+      targetNode.setBeforeKey(key);
+      targetNode.setNextKey(nextKey);
+
+      sourceNode.setBeforeKey(targetbeforeKey);
+      sourceNode.setNextKey(beforeKey);
+
+      if (this.isFirst(beforeKey)) {
+        this.firstKey = key;
+      } else if (targetbeforeKey) {
+        this._getLinkedNodeByKey(targetbeforeKey)
+          .setNextKey(key);
+      }
+      if (this.isLast(key)) {
+        this.lastKey = beforeKey;
+      } else if (nextKey) {
+        this._getLinkedNodeByKey(nextKey)
+          .setBeforeKey(beforeKey);
+      }
+    }
+  }
+
+  /**
+   * 将节点下移一个位置
+   * @param {string} key
+   */
+  movedownByKey(key: string) {
+    if (this.isLast(key)) return;
+    if (this.isExist(key)) {
+      const sourceNode = this._getLinkedNodeByKey(key);
+      const beforeKey = sourceNode.getBeforeKey();
+      const nextNodeKey = sourceNode.getNextKey();
+
+      const targetNode = this._getLinkedNodeByKey(nextNodeKey);
+      const nextKey = targetNode.getNextKey();
+
+
+      targetNode.setBeforeKey(beforeKey);
+      targetNode.setNextKey(key);
+
+      sourceNode.setBeforeKey(nextNodeKey);
+      sourceNode.setNextKey(nextKey);
+
+      if (this.isLast(nextNodeKey)) {
+        this.lastKey = key;
+      } else if (nextKey) {
+        this._getLinkedNodeByKey(nextKey)
+          .setBeforeKey(key);
+      }
+
+      if (this.isFirst(key)) {
+        this.firstKey = nextNodeKey;
+      } else if (beforeKey) {
+        this._getLinkedNodeByKey(beforeKey)
+          .setNextKey(nextNodeKey);
+      }
+    }
+  }
+
+  /**
+   * 交换位置
+   * @param {string} sourceKey
+   * @param {string} targetKey
+   */
+  exchangeItemByKey(sourceKey: string, targetKey: string) {
+    if (this.isExist(sourceKey) && this.isExist(targetKey)) {
+      const sourceNode = this._getLinkedNodeByKey(sourceKey);
+      const sourceBeforeKey = sourceNode.getBeforeKey();
+      const sourceNextKey = sourceNode.getNextKey();
+
+      const targetNode = this._getLinkedNodeByKey(targetKey);
+      const targetBeforeKey = targetNode.getBeforeKey();
+      const targetNextKey = targetNode.getNextKey();
+
+      if (sourceNextKey === targetKey) {
+        // 相邻的两个互换位置 source 在前 target在后
+        // 将 source 节点下移一个位置
+        this.movedownByKey(sourceKey);
+      } else if (sourceBeforeKey === targetKey) {
+        // 相邻的两个互换位置 target在前 source 在后
+        // 将 source 节点上移一个位置
+        this.moveupByKey(sourceKey);
+      } else {
+        sourceNode.setBeforeKey(targetBeforeKey);
+        sourceNode.setNextKey(targetNextKey);
+        targetNode.setBeforeKey(sourceBeforeKey);
+        targetNode.setNextKey(sourceNextKey);
+
+        if (this.isFirst(sourceKey)) {
+          this.firstKey = targetKey;
+        } else if (this.isFirst(targetKey)) {
+          this.firstKey = sourceKey;
+        }
+
+        if (this.isLast(sourceKey)) {
+          this.lastKey = targetKey;
+        } else if (this.isLast(targetKey)) {
+          this.lastKey = sourceKey;
+        }
+
+        if (sourceBeforeKey) {
+          const item = this._getLinkedNodeByKey(sourceBeforeKey);
+          if (item) {
+            item.setNextKey(targetKey);
+          }
+        }
+        if (targetNextKey) {
+          const item = this._getLinkedNodeByKey(targetNextKey);
+          if (item) {
+            item.setBeforeKey(sourceKey);
+          }
+        }
+
+        if (targetBeforeKey) {
+          const item = this._getLinkedNodeByKey(targetBeforeKey);
+          if (item) {
+            item.setNextKey(sourceKey);
+          }
+        }
+        if (sourceNextKey) {
+          const item = this._getLinkedNodeByKey(sourceNextKey);
+          if (item) {
+            item.setBeforeKey(targetKey);
+          }
+        }
       }
     }
   }
