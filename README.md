@@ -4,7 +4,7 @@ StepGuidance 一个不侵入业务的，通过GUI动态创建步骤引导的工�
 <br>
 当然你也可以用他来编写网站的技术文档。
 
-<video src="./example.mp4" controls style="width:100%;"></video>
+![example](./example.gif)
 
 ```
 npm install step-guidance

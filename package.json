@@ -13,7 +13,7 @@
     "dev": "rollup -c -w",
     "build": "rollup -c"
   },
-  "private": true,
+  "private": false,
   "devDependencies": {
     "rollup": "^2.33.3",
     "rollup-plugin-less": "^1.1.2",
