@@ -8,6 +8,7 @@
     "name": "robin",
     "email": "284595745@qq.com"
   },
+  "repository": "git@github.com:robinwp/step-guidance.git",
   "scripts": {
     "dev": "rollup -c -w",
     "build": "rollup -c"
