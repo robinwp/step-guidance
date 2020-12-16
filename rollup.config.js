@@ -7,11 +7,11 @@ import less from 'rollup-plugin-less';
 export default {
   input: 'src/index.ts',
   output: [{
-    file: 'dist/stepGuidance.min.js',
+    file: 'dist/step-guidance.min.js',
     name: 'StepGuidance',
     format: 'iife',
   }, {
-   file: 'dist/stepGuidance.umd.js',
+   file: 'dist/step-guidance.umd.js',
    name: 'StepGuidance',
    format: 'umd',
    }],

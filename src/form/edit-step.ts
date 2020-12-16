@@ -111,7 +111,7 @@ export default class EditStep {
     }, 'p'));
     this.javaScript = (createdEL({
       class: 'step-edit__textarea',
-      placeholder: '请输入javascript执行脚本',
+      placeholder: '请输入javascript执行脚本（xpath和context是内置的参数，可在脚本中直接使用）',
     }, 'textarea') as HTMLTextAreaElement);
     this.javaScript.addEventListener('input', () => {
       this.step.javaScript = this.javaScript.value;

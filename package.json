@@ -1,15 +1,16 @@
 {
   "name": "step-guidance",
-  "version": "1.0.0",
-  "main": "dist/stepGuidance.umd.js",
+  "version": "0.0.1",
+  "main": "dist/step-guidance.umd.js",
   "typings": "dist/index.d.ts",
   "license": "MIT",
   "author": {
     "name": "robin",
-    "email": "robinwpzan@gmail.com"
+    "email": "284595745@qq.com"
   },
   "scripts": {
-    "dev": "rollup -c -w"
+    "dev": "rollup -c -w",
+    "build": "rollup -c"
   },
   "private": true,
   "devDependencies": {

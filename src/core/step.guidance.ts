@@ -17,6 +17,10 @@ enum StepGuidanceEnum {
   manage = 3,
 }
 
+/**
+ * StepGuidance
+ * @alpha
+ */
 class StepGuidance {
   private model: StepGuidanceEnum;
   private previewBtn: HTMLElement;
@@ -36,6 +40,11 @@ class StepGuidance {
   private stepManageCom: StepManage;
   private readonly context: any; // 执行js时的可操作对象，比如可以吧网站的vue对象传入，在执行js时，就可以使用app.$router.push 进行页面跳转
 
+  /**
+   * 构造函数
+   * @param {*} [context] javascript执行脚本的执行上下文
+   * @param {*} [router] 对于spa应用，请传入路由对象。mpa应用忽略
+   */
   constructor(context?: any, router?: any) {
     this.context = context;
 
@@ -65,7 +74,7 @@ class StepGuidance {
       },
     }, 'span');
     this.addBtn.addEventListener('click', () => {
-      this.addNode();
+      this.addNode(this.currentEl);
     });
     this.highlighter = new Highlighter([this.addBtn]);
   }
@@ -201,6 +210,10 @@ class StepGuidance {
   }, 100)
     .bind(this);
 
+  /**
+   * 切换运行模式
+   * @param {StepGuidanceEnum} modal  1预览，2编辑，3管理步骤
+   */
   public toggleModel(modal: StepGuidanceEnum) {
     this.model = modal;
     this.previewBtn.classList.remove('active');
@@ -232,8 +245,11 @@ class StepGuidance {
     }
   }
 
-  public addNode(el?: HTMLElement) {
-    el = el || this.currentEl;
+  /**
+   * 将元素添加进步骤中
+   * @param {HTMLElement} el
+   */
+  public addNode(el: HTMLElement) {
     if (el) {
       this.disableSelectNode = true;
       const xpath = readXPath(el);
@@ -249,19 +265,30 @@ class StepGuidance {
     }
   }
 
-  public save() {
+  /**
+   * 保存
+   * 目前会保存在localStorage中，后续支持保存到云端
+   * @return {string} 步骤对象的json字符串
+   */
+  public save(): string {
     const len = this.stepMap.getSize();
+    const result = this.stepMap.toJSON();
     if (len > 0) {
-      localStorage.setItem('step-guidance-map', this.stepMap.toJSON());
+      localStorage.setItem('step-guidance-map', result);
       alert(`保存了${ len }条步骤`);
     } else {
       alert('没有添加任何步骤');
     }
+    return result;
   }
 
-  public loadData() {
+  /**
+   * 加载保存的数据对象
+   * @param {string} [stepMap] 步骤的链表结构的json字符串。默认加载localStorage中保存的步骤数据
+   */
+  public loadData(stepMap?: string) {
     try {
-      const data = JSON.parse(localStorage.getItem('step-guidance-map'));
+      const data = JSON.parse(stepMap || localStorage.getItem('step-guidance-map'));
       if (data) {
         this.stepMap.addLastItemByList(data.firstKey, data.queue);
       }
@@ -273,8 +300,23 @@ class StepGuidance {
     localStorage.removeItem('step-guidance-current-key');
   }
 
+  /**
+   * 预览
+   */
   public preview() {
     this.toggleModel(StepGuidanceEnum.preview);
+  }
+
+  /**
+   * 设置从何处开始预览，并预览
+   * @param { string } startKey 开始预览的key
+   */
+  public previewByKey(startKey: string) {
+    if (this.stepMap.isExist(startKey)) {
+      this.currentStepKey = startKey;
+      this.previewCom.currentStepKey = startKey;
+      this.preview();
+    }
   }
 }
 
